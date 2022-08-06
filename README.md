@@ -109,7 +109,7 @@ chains:
             version: ics20-1
             order: UNORDERED
 paths:
-    gaia-stride:
+    stride-gaia:
         src:
             chain-id: STRIDE-TESTNET-2
             client-id: 07-tendermint-0
