@@ -1,17 +1,18 @@
-# In current manual we will learn how to set up IBC relayer between two cosmos chains
+# Mevcut kılavuzda, iki kozmos zinciri arasında IBC rölesinin nasıl kurulacağını öğreneceğiz.
 
-Using the example of installing and running Relayer-v2.0.0
+Relayer-v2.0.0 yükleme ve çalıştırma örneğini kullanma
 
 # Update system
 ```
      sudo apt update && sudo apt upgrade -y
 ```
 
-# Install dependencies
+# Bağımlılıkları yükle
 ```
      sudo apt install wget git make htop unzip -y
 ```
-# Install Go 1.18.3
+# Go 1.18.3 kurulumu
+Gerekli ise kurun. zaten kurulu ise bu adımı atlayın.
 ```
      cd $HOME && \
      ver="1.18.3" && \
@@ -23,46 +24,49 @@ Using the example of installing and running Relayer-v2.0.0
      source $HOME/.bash_profile && \
      go version
 ```
-# Make relayer home dir
+# Relayer in klasörünü oluşturma
 ```
      cd $HOME
      mkdir -p $HOME/.relayer/config
 ```
 
-# Download go-v2 relayer
+# go-v2 relayer indirme
 ```
      git clone https://github.com/cosmos/relayer.git
      cd relayer && git checkout v2.0.0
      make install
  
 ```
-# Make you own config for Relayer v2
+# Kendi ayarlarınıza göre değişken ayarlama.
+aşağıdaki değerleri kendinize göre ayarlayarak yazın. portlarınızı örenmek için ilgili node'un config dosyalarına bakın.
 ```
      cd $HOME
      mkdir -p $HOME/.relayer/config
      
-     MEMO=Your memo #archebald#2945
+     MEMO=ornek_discord#1234
      
-     KEYSTRIDE=Name of your key #stride
-     KEYGAIA=Name of your key
+     KEYSTRIDE=stride için wallet ismi
+     KEYGAIA=gaia için wallet ismi
      
-     IPSTRIDE=IP your STRIDE node #164.68.125.90
-     PORTSTRIDE=Port RPC your STRIDE node #10002 or 26657 if the nodes are on different servers
+     IPSTRIDE=stride sunucu ip adresi #123.123.123.123
+     PORTSTRIDE=STRIDE icin RPC portu nodunuza göre ayarlayın.
 
-     IPGAIA=IP you GAIA node #164.68.125.90
-     PORTGAIA=RPC port of your GAIA node #10004 or 26657 if the nodes are on different servers
+     IPGAIA=IP you GAIA node #123.123.123.123
+     PORTGAIA=GAIA icin RPC portu nodunuza göre ayarlayın.
 ```
 
-# Next - to add the chain config files manually
+# Next - zincir yapılandırma dosyalarını manuel olarak eklemek için
+bir sonraki adımı kullanacaksanız bu adımı atlayın.
 ```
 $ rly chains add --url https://gist.githubusercontent.com/Archebald-now/3aef116b9dd67009600d8da1746dfe1f/raw/06f7e8959d5d9735576867ae723ca5c35f485aed/GAIA_config.json gaia
 $ rly chains add --url https://gist.githubusercontent.com/Archebald-now/3aef116b9dd67009600d8da1746dfe1f/raw/06f7e8959d5d9735576867ae723ca5c35f485aed/STRIDE-TESTNET-2_config.json stride
 ```
-after which you need to make changes in the configuration file
+bundan sonra yapılandırma dosyasında değişiklik yapmanız gerekir
 ```nano /root/.relayer/config/config.yaml```
-and replace rpc-addr with your knowledge
+ve bilginizle rpc-addr'yi değiştirin
 
-# Or  - copy all one comand to terminal
+# Veya - tüm komutu terminale kopyalayın
+not: aşağıdaki tüm satırlar tek bir komuttur. ve tek bir seferde yapıştırılmalıdır.
 ```
 
 sudo tee $HOME/.relayer/config/config.yaml > /dev/null <<EOF
@@ -140,37 +144,38 @@ paths:
 EOF
 ```
 
-# Check chains added to relayer
+# Röleye eklenen zincirleri kontrol edin
    ```
    rly chains list
    ```
-# Successful output:
+# Başarılı çıktı:
 ```
  1: STRIDE-TESTNET-2     -> type(cosmos) key(✔) bal(✔) path(✔)
  2: GAIA                 -> type(cosmos) key(✔) bal(✔) path(✔)
 ```
-# Check path is correct
+# "Path" un doğru olup olmadığını kontrol edin
    ```
    rly paths list
    ```
-# Successful output:
+# Başarılı çıktı:
 ```
 0: gaia-stride          -> chns(✔) clnts(✔) conn(✔) (GAIA<>STRIDE-TESTNET-2)
 ```
 
-# Import  keys for the relayer to use when signing and relaying transactions
+# Aktarıcının işlemleri imzalarken ve aktarırken kullanması için anahtarları içe aktarın
    ```
      rly keys restore stride $KEYSTRIDE "mnemonic words here"
      rly keys restore gaia $KEYGAIA "mnemonic words here"
    ```
-# Check wallet balance
+# Cüzdan bakiyesini kontrol edin
+stride hesabınızda STRD gaia hesabınızda ATOM paranızdan bir miktar olmalı.
 ```
 rly q balance stride
 rly q balance gaia
 ```
    
-# Create go-v2 relayer service file
- (copy and paste into the terminal with one command)
+# go-v2 aktarıcı hizmet dosyası oluşturun
+ (tek bir komutla terminale kopyalayıp yapıştırın)
 ```
 sudo tee /etc/systemd/system/rlyd.service > /dev/null <<EOF
 [Unit]
@@ -188,13 +193,13 @@ WantedBy=multi-user.target
 EOF
 ```
 
-# Start service
+# Hizmeti başlat
 ```
      sudo systemctl daemon-reload
      sudo systemctl enable rlyd
      sudo systemctl restart rlyd && journalctl -fu rlyd -o cat
 ```
-# The following logs will indicate the successful completion of setting up Relayer_v2.0.0:
+# Aşağıdaki günlükler, Relayer_v2.0.0 kurulumunun başarıyla tamamlandığını gösterecektir:
 <a href='https://postimg.cc/XBGzBqFv' target='_blank'><img src='https://i.postimg.cc/XBGzBqFv/logs-relayer-v2.jpg' border='0' alt='logs-relayer-v2'/></a>
 
-# Thanks to goooodnes#8929 and Zuka#5870 for the inspiration for this guide.
+# Bu kılavuz için ilham kaynağı olan goooodnes#8929 ve Zuka#5870'e teşekkürler.
