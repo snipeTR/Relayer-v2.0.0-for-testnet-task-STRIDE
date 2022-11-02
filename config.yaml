@@ -1,7 +1,7 @@
 global:
     api-listen-addr: :5183
     timeout: 1m
-    memo: archebald#2945
+    memo: snipeTR#8374
     light-cache-size: 20
 chains:
     gaia:
